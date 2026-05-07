@@ -954,7 +954,7 @@ function renderWeek() {
   DAYS.forEach((d, i) => {
     const el = document.createElement('div');
     el.className = 'week-day-label' + (i === todayIdx ? ' today-col' : '');
-    el.textContent = d;
+    el.innerHTML = `<span style="font-size:.7rem;opacity:.65;display:block;margin-bottom:2px">${i+1}</span>${d}`;
     hdr.appendChild(el);
   });
 
