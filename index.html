@@ -740,7 +740,19 @@ function loadState() {
 }
 
 function saveState() {
-  localStorage.setItem('family-routine-v2', JSON.stringify(state));
+  try {
+    localStorage.setItem('family-routine-v2', JSON.stringify(state));
+  } catch(e) {
+    // localStorage quota exceeded (likely large photos) — save without photos
+    const slim = JSON.parse(JSON.stringify(state));
+    slim.people = slim.people.map(p => ({ ...p, photo: null }));
+    try {
+      localStorage.setItem('family-routine-v2', JSON.stringify(slim));
+      console.warn('Photos too large for localStorage — saved without photos. Use smaller images.');
+    } catch(e2) {
+      console.error('Could not save state:', e2);
+    }
+  }
 }
 
 function isDone(taskId) {
@@ -1107,7 +1119,11 @@ function updateColor(i, val) {
 function handlePhotoUpload(i, e) {
   const f = e.target.files[0]; if (!f) return;
   const r = new FileReader();
-  r.onload = ev => { state.people[i].photo = ev.target.result; renderPersonCards(); };
+  r.onload = ev => {
+    state.people[i].photo = ev.target.result;
+    saveState();
+    renderPersonCards();
+  };
   r.readAsDataURL(f);
 }
 
